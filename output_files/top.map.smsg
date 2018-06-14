@@ -1,0 +1,1 @@
+Info (10281): Verilog HDL Declaration information at program1_tb.sv(18): object "lfsr_ptrn" differs only in case from object "LFSR_ptrn" in the same scope

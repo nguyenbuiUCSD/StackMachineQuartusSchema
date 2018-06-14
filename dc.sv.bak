@@ -1,0 +1,213 @@
+// CSE141L Spring 2018 Nguyen Bui - Richard Chum
+// decoder block decode all instructions and output control signals
+import definitions::*;
+module dc(
+  input[8:0] instruction,
+  output logic [1:0] tomux2, tomux5,tosc, tomux4,
+  output logic [2:0] toalu,
+  output logic towe, tomux7, tomux6,toMarwe, toCntwe, toDmemwe, tomux8, toBarwe 
+               );
+
+
+    always_comb begin
+    
+    // P TYPE
+    if (instruction[8] == P_TYPE)
+      begin
+        tomux2 <= SEL_IMEM;
+        towe <= 1'b1;
+        tosc <= ADV_1;
+        toMarwe <= 1'b0;
+	toCntwe <= 1'b0;
+	toDmemwe <= 1'b0;
+	toBarwe <= 1'b0;
+	toalu <= aluADD;
+      end
+    else if (instruction[8:7] == R_TYPE)
+      begin
+        case (instruction[6:0])
+	  R_PMAR:
+	    begin
+	      towe <= 1'b0;
+ 	      tomux6 <= 1'b1;
+	      tosc <= DES_1;
+              toMarwe <= 1'b1;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+	      toalu <= aluADD;
+	    end
+          R_ADD:
+            begin
+              towe <= 1'b1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+              toalu <=aluADD;
+              tomux2 <= SEL_ALUOUT;
+	      tomux5 <= SEL_SND_ST;
+              tosc <= DES_1;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+              tomux4 <= SEL4_TOP_ST;
+            end
+          R_PCNT:
+	    begin
+	      towe <= 1'b0;
+ 	      tomux7 <= SEL7_TOP_ST;
+	      tosc <= DES_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b1;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+	      toalu <= aluADD;
+	    end
+ 	  R_LDS:
+	    begin
+	      towe <= 1'b1;
+	      tosc <= ADV_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      tomux2 <= SEL_DMEM;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+	      toalu <= aluADD;
+	    end
+	  R_ST:
+	    begin
+	      towe <= 1'b0;
+	      tosc <= DES_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b1;
+	      toBarwe <= 1'b0;
+	      toalu <= aluADD;
+	    end
+	   R_CPY:
+	    begin
+	      towe <= 1'b1;
+	      tosc <= ADV_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      tomux2 <= SEL_TOP_ST;
+	      toBarwe <= 1'b0;
+	      toalu <= aluADD;
+	    end
+	   R_XOR:
+	    begin
+	      towe <= 1'b1;
+	      tosc <= DES_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      tomux2 <= SEL_ALUOUT;
+              tomux4 <= SEL4_TOP_ST;
+	      tomux5 <= SEL_SND_ST ;
+              toalu <=aluXOR;
+	      toBarwe <= 1'b0;
+	    end
+	   R_AND:
+	    begin
+	      towe <= 1'b1;
+	      tosc <= DES_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      tomux2 <= SEL_ALUOUT;
+              tomux4 <= SEL4_TOP_ST;
+	      tomux5 <= SEL_SND_ST ;
+              toalu <=aluAND;
+	      toBarwe <= 1'b0;
+	    end
+           R_BNE:
+	    begin
+	      towe <= 1'b0;
+	      tosc <= DES_1;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+              tomux4 <= SEL4_TOP_ST;
+	      tomux5 <= SEL_MUX8OUT;
+	      tomux8 <= SEL_CNT ;
+              toalu <=aluBNE;
+	      toBarwe <= 1'b0;
+	    end
+	  R_PBAR:
+	    begin
+	      towe <= 1'b0;
+	      tosc <= DES_1;
+              toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b1;
+	      toalu  <= aluADD;
+	    end
+	  R_ADDC:
+	    begin
+	      towe <= 1'b0;
+	      tosc <= ADV_0;
+              toMarwe <= 1'b0;
+	      toCntwe <= 1'b1;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+	      tomux8 <= SEL_CNT;
+              tomux4 <= SEL4_1;
+	      tomux7 <= SEL7_ALUOUT;
+	      toalu <= aluADD;
+	      tomux5 <= SEL_MUX8OUT;
+	    end
+	  R_LDCNT:
+	    begin
+	      towe <= 1'b1;
+	      tosc <= ADV_1;
+              toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      toBarwe <= 1'b0;
+	      tomux8 <= SEL_CNT;
+              tomux4 <= SEL4_0;
+              tomux5 <= SEL_MUX8OUT;
+	      tomux2 <= SEL_ALUOUT;
+	      toalu <= aluADD;
+	    end
+
+
+
+        endcase
+      end
+    else if (instruction[8:7] == I_TYPE)
+       begin
+	  case (instruction[6:4])
+            I_SRN:
+	     begin
+	      towe <= 1'b1;
+	      tosc <= ADV_0;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      tomux2 <= SEL_ALUOUT;
+              tomux4 <= SEL4_TOP_ST;
+	      tomux5 <= SEL_IMEMOUT;           
+	      toalu <= aluSR;
+	      toBarwe <= 1'b0;
+ 	     end
+	    I_SLN:
+	     begin
+	      towe <= 1'b1;
+	      tosc <= ADV_0;
+	      toMarwe <= 1'b0;
+	      toCntwe <= 1'b0;
+	      toDmemwe <= 1'b0;
+	      tomux2 <= SEL_ALUOUT;
+              tomux4 <= SEL4_TOP_ST;
+	      tomux5 <= SEL_IMEMOUT;           
+	      toalu <= aluSL;
+	      toBarwe <= 1'b0;
+ 	     end
+       
+  	  endcase 
+       end
+    end
+
+
+endmodule
